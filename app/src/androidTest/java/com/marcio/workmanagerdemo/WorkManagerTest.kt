@@ -2,6 +2,7 @@ package com.marcio.workmanagerdemo
 
 import android.util.Log
 import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.work.*
@@ -10,6 +11,7 @@ import androidx.work.testing.WorkManagerTestInitHelper
 import com.marcio.workmanagerdemo.AndroidTestHelper.Companion.launchActivity
 import io.mockk.spyk
 import io.mockk.verify
+import org.hamcrest.CoreMatchers.`is`
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +39,29 @@ class WorkManagerTest {
     }
 
     @Test
-    fun test1() {
+    fun testWorkManagerDirect() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
+        val request = OneTimeWorkRequestBuilder<RefreshTokenWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+
+        val workManager = WorkManager.getInstance(context)
+        workManager.enqueue(request).result.get()
+
+        val testDriver = WorkManagerTestInitHelper.getTestDriver(context)
+        testDriver?.setAllConstraintsMet(request.id)
+
+        val workInfo = workManager.getWorkInfoById(request.id).get()
+        assertThat(workInfo.state, `is`(WorkInfo.State.SUCCEEDED))
+    }
+
+    @Test
+    fun testIntegration() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val request = OneTimeWorkRequestBuilder<RefreshTokenWorker>()
             .setConstraints(
