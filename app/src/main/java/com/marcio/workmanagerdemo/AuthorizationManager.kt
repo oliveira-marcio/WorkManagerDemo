@@ -1,8 +1,11 @@
 package com.marcio.workmanagerdemo
 
+import android.content.SharedPreferences
+
 class AuthorizationManager(
     private val tokenService: TokenService,
-    private val jobScheduler: JobScheduler
+    private val jobScheduler: JobScheduler,
+    private val sharedPreferences: SharedPreferences
 ) {
     fun start() {
         jobScheduler.start()
@@ -14,5 +17,6 @@ class AuthorizationManager(
 
     fun revokeAuthorization() {
         jobScheduler.stop()
+        sharedPreferences.edit().remove("token").commit()
     }
 }

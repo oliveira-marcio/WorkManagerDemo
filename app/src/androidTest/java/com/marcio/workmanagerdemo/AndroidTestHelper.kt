@@ -3,6 +3,7 @@ package com.marcio.workmanagerdemo
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import java.util.concurrent.CountDownLatch
@@ -12,14 +13,16 @@ class AndroidTestHelper {
         fun <T : Activity> launchActivity(
             rule: AndroidTestHelperRule<T>,
             jobScheduler: JobScheduler,
-            tokenService: TokenService = TokenService(),
+            sharedPreferences: SharedPreferences = FakeSharedPreferences(),
+            tokenService: TokenService = TokenService(sharedPreferences),
             ruleIntent: Intent = Intent(),
             application: MyApplication = ApplicationProvider.getApplicationContext(),
             lock: CountDownLatch = CountDownLatch(1),
             beforeLaunch: (() -> Unit)? = null
         ) {
 
-            val testAuthorizationManager = AuthorizationManager(tokenService, jobScheduler)
+            val testAuthorizationManager =
+                AuthorizationManager(tokenService, jobScheduler, sharedPreferences)
 
             setLazyDependency(application, "authorizationManager", testAuthorizationManager)
             setLazyDependency(application, "jobScheduler", jobScheduler)

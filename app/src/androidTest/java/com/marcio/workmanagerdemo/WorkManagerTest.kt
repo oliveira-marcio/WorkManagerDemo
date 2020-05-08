@@ -1,23 +1,19 @@
 package com.marcio.workmanagerdemo
 
 import android.util.Log
-import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.*
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.marcio.workmanagerdemo.AndroidTestHelper.Companion.launchActivity
-import io.mockk.spyk
-import io.mockk.verify
 import org.hamcrest.CoreMatchers.`is`
-
-import org.junit.Test
-import org.junit.runner.RunWith
-
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class WorkManagerTest {
@@ -70,25 +66,21 @@ class WorkManagerTest {
                     .build()
             )
             .build()
-        val jobScheduler =  RefreshTokenJobScheduler(
+        val jobScheduler = RefreshTokenJobScheduler(
             WorkManager.getInstance(context), request
         )
 
-        val tokenService = spyk(TokenService())
+        val sharedPreferences = FakeSharedPreferences(mutableMapOf("token" to "old_token"))
 
         launchActivity(
             rule,
             jobScheduler,
-            tokenService
+            sharedPreferences
         )
 
         val testDriver = WorkManagerTestInitHelper.getTestDriver(context)
         testDriver?.setAllConstraintsMet(request.id)
 
-        onIdle()
-
-        verify {
-            tokenService.refreshToken()
-        }
+        assertEquals("new_token", sharedPreferences.getString("token", ""))
     }
 }
