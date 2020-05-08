@@ -19,10 +19,12 @@ class AndroidTestHelper {
             beforeLaunch: (() -> Unit)? = null
         ) {
 
-            val testAuthorizationManager = AuthorizationManager(tokenService)
+            val testAuthorizationManager = AuthorizationManager(tokenService, jobScheduler)
 
             setLazyDependency(application, "authorizationManager", testAuthorizationManager)
             setLazyDependency(application, "jobScheduler", jobScheduler)
+
+            testAuthorizationManager.start()
 
             Espresso.onIdle {
                 beforeLaunch?.invoke()

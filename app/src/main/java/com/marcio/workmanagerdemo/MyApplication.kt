@@ -20,9 +20,14 @@ class MyApplication: Application(), DependencyManager {
         )
     }
 
-//    val pRequest = PeriodicWorkRequest.Builder(MyWorker::class.java, 15, TimeUnit.MINUTES).build()
+//    val periodicRequest = PeriodicWorkRequest.Builder(MyWorker::class.java, 15, TimeUnit.MINUTES).build()
 
     override val authorizationManager by lazy {
-        AuthorizationManager(TokenService())
+        AuthorizationManager(TokenService(),  jobScheduler)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        authorizationManager.start()
     }
 }
